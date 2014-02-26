@@ -1,0 +1,10 @@
+{
+    "name": "angular-unisson-auth",
+    "version": "0.0.1",
+
+    "dependencies":{
+      "http-auth-interceptor":"",
+      "ngCookies":"",
+      "googleOauth":""
+    }
+}
