@@ -1,10 +1,15 @@
 {
     "name": "angular-unisson-auth",
     "version": "0.0.1",
-
+    ignore: [
+      '.gitignore',
+      'bower.json',
+    ],
     "dependencies":{
       "http-auth-interceptor":"",
       "ngCookies":"",
       "googleOauth":""
-    }
+    },
+    homepage: "https://github.com/UnissonCo/angular-unisson-auth"
+    
 }

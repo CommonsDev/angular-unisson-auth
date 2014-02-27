@@ -1,14 +1,13 @@
 (function() {
-  var LoginCtrl, module,
+  var LoginService, module,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   module = angular.module('angular-unisson-auth', ['http-auth-interceptor', 'ngCookies', 'googleOauth']);
 
-  LoginCtrl = (function() {
+  LoginService = (function() {
     "Login a user";
-    function LoginCtrl($scope, $rootScope, $http, $state, Restangular, $cookies, authService, Token) {
+    function LoginService($rootScope, $http, $state, Restangular, $cookies, authService, Token) {
       var _this = this;
-      this.$scope = $scope;
       this.$rootScope = $rootScope;
       this.$http = $http;
       this.$state = $state;
@@ -20,50 +19,54 @@
       this.submit = __bind(this.submit, this);
       this.logout = __bind(this.logout, this);
       this.forceLogin = __bind(this.forceLogin, this);
-      this.$scope.isAuthenticated = false;
-      this.$scope.username = "";
-      this.$scope.loginrequired = false;
-      this.$scope.$on('event:auth-loginRequired', function() {
-        _this.$scope.loginrequired = true;
+      this.$rootScope.authVars = {
+        username: "",
+        isAuthenticated: false,
+        loginrequired: false
+      };
+      this.$rootScope.$on('event:auth-loginRequired', function() {
+        _this.$rootScope.authVars.loginrequired = true;
         return console.debug("Login required");
       });
-      this.$scope.$on('event:auth-loginConfirmed', function() {
+      this.$rootScope.$on('event:auth-loginConfirmed', function() {
         console.debug("Login OK");
-        _this.$scope.loginrequired = false;
-        _this.$scope.username = _this.$cookies.username;
-        return _this.$scope.isAuthenticated = true;
+        _this.$rootScope.authVars.loginrequired = false;
+        _this.$rootScope.authVars.username = _this.$cookies.username;
+        return _this.$rootScope.authVars.isAuthenticated = true;
       });
       if (this.$cookies.username && this.$cookies.key) {
         console.debug("Already logged in.");
         this.$http.defaults.headers.common['Authorization'] = "ApiKey " + this.$cookies.username + ":" + this.$cookies.key;
         this.authService.loginConfirmed();
       }
-      this.$scope.accessToken = this.Token.get();
-      this.$scope.submit = this.submit;
-      this.$scope.authenticateGoogle = this.authenticateGoogle;
-      this.$scope.forceLogin = this.forceLogin;
-      this.$scope.logout = this.logout;
+      this.$rootScope.accessToken = this.Token.get();
+      this.$rootScope.submit = this.submit;
+      this.$rootScope.authenticateGoogle = this.authenticateGoogle;
+      this.$rootScope.forceLogin = this.forceLogin;
+      this.$rootScope.logout = this.logout;
     }
 
-    LoginCtrl.prototype.forceLogin = function() {
-      return this.$scope.loginrequired = true;
+    LoginService.prototype.forceLogin = function() {
+      console.debug("forcing login");
+      this.$rootScope.authVars.loginrequired = true;
+      return console.debug(this.$rootScope.authVars.loginrequired);
     };
 
-    LoginCtrl.prototype.logout = function() {
-      this.$scope.isAuthenticated = false;
+    LoginService.prototype.logout = function() {
+      this.$rootScope.authVars.isAuthenticated = false;
       delete this.$http.defaults.headers.common['Authorization'];
       delete this.$cookies['username'];
       delete this.$cookies['key'];
-      this.$scope.username = "";
+      this.$rootScope.authVars.username = "";
       return this.$state.go('index');
     };
 
-    LoginCtrl.prototype.submit = function() {
+    LoginService.prototype.submit = function() {
       var _this = this;
       console.debug('submitting login...');
       return this.Restangular.all('account/user').customPOST("login", {}, {}, {
-        username: this.$scope.username,
-        password: this.$scope.password
+        username: this.$rootScope.authVars.username,
+        password: this.$rootScope.authVars.password
       }).then(function(data) {
         _this.$cookies.username = data.username;
         _this.$cookies.key = data.key;
@@ -71,15 +74,15 @@
         return _this.authService.loginConfirmed();
       }, function(data) {
         console.debug("LoginController submit error: " + data.reason);
-        return _this.$scope.errorMsg = data.reason;
+        return _this.$rootScope.errorMsg = data.reason;
       });
     };
 
-    LoginCtrl.prototype.authenticateGoogle = function() {
+    LoginService.prototype.authenticateGoogle = function() {
       var extraParams,
         _this = this;
       extraParams = {};
-      if (this.$scope.askApproval) {
+      if (this.$rootScope.askApproval) {
         extraParams = {
           approval_prompt: 'force'
         };
@@ -94,19 +97,22 @@
           return _this.authService.loginConfirmed();
         }, function(data) {
           console.debug("LoginController submit error: " + data.reason);
-          return _this.$scope.errorMsg = data.reason;
+          return _this.$rootScope.errorMsg = data.reason;
         });
       }, function() {
         return alert("Failed to get token from popup.");
       });
     };
 
-    return LoginCtrl;
+    return LoginService;
 
   })();
 
-  LoginCtrl.$inject = ['$scope', '$rootScope', "$http", "$state", "Restangular", "$cookies", "authService", "Token"];
-
-  module.controller("LoginCtrl", LoginCtrl);
+  module.factory("loginService", [
+    '$rootScope', "$http", "$state", "Restangular", "$cookies", "authService", "Token", function($rootScope, $http, $state, Restangular, $cookies, authService, Token) {
+      console.debug("init unisson auth service");
+      return new LoginService($rootScope, $http, $state, Restangular, $cookies, authService, Token);
+    }
+  ]);
 
 }).call(this);

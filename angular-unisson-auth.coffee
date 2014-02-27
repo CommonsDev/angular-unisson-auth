@@ -1,26 +1,27 @@
 module = angular.module('angular-unisson-auth', ['http-auth-interceptor', 'ngCookies', 'googleOauth'])
 
-class LoginCtrl
+class LoginService   
         """
         Login a user
         """
-        constructor: (@$scope, @$rootScope, @$http, @$state, @Restangular, @$cookies, @authService, @Token) ->
-                @$scope.isAuthenticated = false
-                @$scope.username = ""
-                @$scope.loginrequired = false
+        constructor: (@$rootScope, @$http, @$state, @Restangular, @$cookies, @authService, @Token) ->
+                @$rootScope.authVars =                        
+                        username : "",
+                        isAuthenticated: false,
+                        loginrequired : false
 
                 # On login required
-                @$scope.$on('event:auth-loginRequired', =>
-                        @$scope.loginrequired = true
+                @$rootScope.$on('event:auth-loginRequired', =>
+                        @$rootScope.authVars.loginrequired = true
                         console.debug("Login required")
                 )
 
                 # On login successful
-                @$scope.$on('event:auth-loginConfirmed', =>
+                @$rootScope.$on('event:auth-loginConfirmed', =>
                         console.debug("Login OK")
-                        @$scope.loginrequired = false
-                        @$scope.username = @$cookies.username
-                        @$scope.isAuthenticated = true
+                        @$rootScope.authVars.loginrequired = false
+                        @$rootScope.authVars.username = @$cookies.username
+                        @$rootScope.authVars.isAuthenticated = true
                 )
 
                 # set authorization header if already logged in
@@ -30,23 +31,24 @@ class LoginCtrl
                         @authService.loginConfirmed()
 
 
-                @$scope.accessToken = @Token.get()
+                @$rootScope.accessToken = @Token.get()
 
                 # Add methods to scope
-                @$scope.submit = this.submit
-                @$scope.authenticateGoogle = this.authenticateGoogle
-                @$scope.forceLogin = this.forceLogin
-                @$scope.logout = this.logout
+                @$rootScope.submit = this.submit
+                @$rootScope.authenticateGoogle = this.authenticateGoogle
+                @$rootScope.forceLogin = this.forceLogin
+                @$rootScope.logout = this.logout
 
         forceLogin: =>
-                @$scope.loginrequired = true
-
+                console.debug("forcing login")
+                @$rootScope.authVars.loginrequired = true
+                console.debug(@$rootScope.authVars.loginrequired)
         logout: =>
-                @$scope.isAuthenticated = false
+                @$rootScope.authVars.isAuthenticated = false
                 delete @$http.defaults.headers.common['Authorization']
                 delete @$cookies['username']
                 delete @$cookies['key']
-                @$scope.username = ""
+                @$rootScope.authVars.username = ""
 
                 @$state.go('index')
 
@@ -54,8 +56,8 @@ class LoginCtrl
         submit: =>
                 console.debug('submitting login...')
                 @Restangular.all('account/user').customPOST("login", {}, {},
-                                username: @$scope.username
-                                password: @$scope.password
+                                username: @$rootScope.authVars.username
+                                password: @$rootScope.authVars.password
                         ).then((data) =>
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
@@ -63,12 +65,12 @@ class LoginCtrl
                                 @authService.loginConfirmed()
                         , (data) =>
                                 console.debug("LoginController submit error: #{data.reason}")
-                                @$scope.errorMsg = data.reason
+                                @$rootScope.errorMsg = data.reason
                 )
 
         authenticateGoogle: =>
                 extraParams = {}
-                if @$scope.askApproval
+                if @$rootScope.askApproval
                         extraParams = {approval_prompt: 'force'}
 
                 @Token.getTokenByPopup(extraParams).then((params) =>
@@ -83,13 +85,14 @@ class LoginCtrl
                                 @authService.loginConfirmed()
                         , (data) =>
                                 console.debug("LoginController submit error: #{data.reason}")
-                                @$scope.errorMsg = data.reason
+                                @$rootScope.errorMsg = data.reason
                         )
                 , ->
                         # Failure getting token from popup.
                         alert("Failed to get token from popup.")
                 )
 
-LoginCtrl.$inject = ['$scope', '$rootScope', "$http", "$state", "Restangular", "$cookies", "authService", "Token"]
-
-module.controller("LoginCtrl", LoginCtrl)
+module.factory("loginService", ['$rootScope', "$http", "$state", "Restangular", "$cookies", "authService", "Token", ($rootScope, $http, $state, Restangular, $cookies, authService, Token) ->
+        console.debug("init unisson auth service")
+        return new LoginService($rootScope, $http, $state, Restangular, $cookies, authService, Token)
+])
