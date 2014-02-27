@@ -5,7 +5,7 @@
     "ignore": [
       ".gitignore",
       "bower.json"
-    ],
+    ], 
     "dependencies": {
       "http-auth-interceptor":"",
       "ngCookies":"",
