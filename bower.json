@@ -1,16 +1,14 @@
 {
-    name: "angular-unisson-auth",
-    version: "0.0.2",
-    main: "angular-unisson-auth.js",
-    ignore: [
+    "name": "angular-unisson-auth",
+    "version": "0.0.4",
+    "main": "angular-unisson-auth.js",
+    "ignore": [
       '.gitignore',
       'bower.json'
     ],
-    dependencies:{
+    "dependencies": {
       "http-auth-interceptor":"",
       "ngCookies":"",
       "googleOauth":""
-    },
-    homepage: "https://github.com/UnissonCo/angular-unisson-auth"
-    
+    }
 }
