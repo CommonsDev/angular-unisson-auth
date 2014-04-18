@@ -7,8 +7,8 @@
       "bower.json"
     ], 
     "dependencies": {
-      "http-auth-interceptor":"",
-      "ngCookies":"",
-      "googleOauth":""
+      "angular-http-auth":"",
+      "angular-cookies":"",
+      "angular-oauth":""
     }
 }
