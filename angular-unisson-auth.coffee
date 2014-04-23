@@ -58,7 +58,9 @@ class LoginService
                 @Restangular.all('account/user').customPOST("login", {}, {},
                                 username: @$rootScope.authVars.username
                                 password: @$rootScope.authVars.password
+                                console.log("user:"+username+" pwd:"+password)
                         ).then((data) =>
+                                console.log(data)
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
                                 @$http.defaults.headers.common['Authorization'] = "ApiKey #{data.username}:#{data.key}"
