@@ -4,7 +4,7 @@ class LoginService
         """
         Login a user
         """
-        constructor: (@$rootScope, @$http, @$state, @Restangular, @$cookies, @authService, @Token) ->
+        constructor: (@$rootScope, @$http, @$state, @loginRestangular, @$cookies, @authService, @Token) ->
                 @$rootScope.authVars =                        
                         username : "",
                         isAuthenticated: false,
@@ -50,15 +50,13 @@ class LoginService
                 delete @$cookies['key']
                 @$rootScope.authVars.username = ""
 
-                @$state.go('index')
+                @$state.go(@$rootScope.homeStateName)
 
-
+ 
         submit: =>
                 console.debug('submitting login...')
-                @Restangular.all('account/user').customPOST("login", {}, {},
-                                username: @$rootScope.authVars.username
-                                password: @$rootScope.authVars.password
-                                console.log("user:"+username+" pwd:"+password)
+                @loginRestangular.all('account/user').customPOST(
+                        {username: @$rootScope.authVars.username, password: @$rootScope.authVars.password},"login", {}
                         ).then((data) =>
                                 console.log(data)
                                 @$cookies.username = data.username
@@ -78,7 +76,7 @@ class LoginService
                 @Token.getTokenByPopup(extraParams).then((params) =>
 
                         # Verify the token before setting it, to avoid the confused deputy problem.
-                        @Restangular.all('account/user/login').customPOST("google", {}, {},
+                        @loginRestangular.all('account/user/login').customPOST("google", {}, {},
                                 access_token: params.access_token
                         ).then((data) =>
                                 @$cookies.username = data.username
@@ -94,7 +92,17 @@ class LoginService
                         alert("Failed to get token from popup.")
                 )
 
-module.factory("loginService", ['$rootScope', "$http", "$state", "Restangular", "$cookies", "authService", "Token", ($rootScope, $http, $state, Restangular, $cookies, authService, Token) ->
+
+
+#Login Restangular service that needs rootScope variable configuration
+module.factory('loginRestangular', ['$rootScope','Restangular', ($rootScope, Restangular) ->
+        console.debug(" Setting login base url : "+ $rootScope.loginBaseUrl)
+        return Restangular.withConfig( (RestangularConfigurer) ->
+                RestangularConfigurer.setBaseUrl($rootScope.loginBaseUrl)
+        )
+])
+
+module.factory("loginService", ['$rootScope', "$http", "$state", "loginRestangular", "$cookies", "authService", "Token", ($rootScope, $http, $state, loginRestangular, $cookies, authService, Token) ->
         console.debug("init unisson auth service")
-        return new LoginService($rootScope, $http, $state, Restangular, $cookies, authService, Token)
+        return new LoginService($rootScope, $http, $state, loginRestangular, $cookies, authService, Token)
 ])
