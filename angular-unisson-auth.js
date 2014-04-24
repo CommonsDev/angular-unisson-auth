@@ -58,7 +58,9 @@
       delete this.$cookies['username'];
       delete this.$cookies['key'];
       this.$rootScope.authVars.username = "";
-      return this.$state.go(this.$rootScope.homeStateName);
+      return this.$state.go(this.$rootScope.homeStateName, {}, {
+        reload: true
+      });
     };
 
     LoginService.prototype.submit = function() {

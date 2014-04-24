@@ -50,7 +50,7 @@ class LoginService
                 delete @$cookies['key']
                 @$rootScope.authVars.username = ""
 
-                @$state.go(@$rootScope.homeStateName)
+                @$state.go(@$rootScope.homeStateName, {}, {reload:true})
 
  
         submit: =>
