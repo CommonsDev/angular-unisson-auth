@@ -6,12 +6,12 @@
 
   LoginService = (function() {
     "Login a user";
-    function LoginService($rootScope, $http, $state, Restangular, $cookies, authService, Token) {
+    function LoginService($rootScope, $http, $state, loginRestangular, $cookies, authService, Token) {
       var _this = this;
       this.$rootScope = $rootScope;
       this.$http = $http;
       this.$state = $state;
-      this.Restangular = Restangular;
+      this.loginRestangular = loginRestangular;
       this.$cookies = $cookies;
       this.authService = authService;
       this.Token = Token;
@@ -58,16 +58,17 @@
       delete this.$cookies['username'];
       delete this.$cookies['key'];
       this.$rootScope.authVars.username = "";
-      return this.$state.go('index');
+      return this.$state.go(this.$rootScope.homeStateName);
     };
 
     LoginService.prototype.submit = function() {
       var _this = this;
       console.debug('submitting login...');
-      return this.Restangular.all('account/user').customPOST("login", {}, {}, {
+      return this.loginRestangular.all('account/user').customPOST({
         username: this.$rootScope.authVars.username,
         password: this.$rootScope.authVars.password
-      }).then(function(data) {
+      }, "login", {}).then(function(data) {
+        console.log(data);
         _this.$cookies.username = data.username;
         _this.$cookies.key = data.key;
         _this.$http.defaults.headers.common['Authorization'] = "ApiKey " + data.username + ":" + data.key;
@@ -88,7 +89,7 @@
         };
       }
       return this.Token.getTokenByPopup(extraParams).then(function(params) {
-        return _this.Restangular.all('account/user/login').customPOST("google", {}, {}, {
+        return _this.loginRestangular.all('account/user/login').customPOST("google", {}, {}, {
           access_token: params.access_token
         }).then(function(data) {
           _this.$cookies.username = data.username;
@@ -108,10 +109,19 @@
 
   })();
 
+  module.factory('loginRestangular', [
+    '$rootScope', 'Restangular', function($rootScope, Restangular) {
+      console.debug(" Setting login base url : " + $rootScope.loginBaseUrl);
+      return Restangular.withConfig(function(RestangularConfigurer) {
+        return RestangularConfigurer.setBaseUrl($rootScope.loginBaseUrl);
+      });
+    }
+  ]);
+
   module.factory("loginService", [
-    '$rootScope', "$http", "$state", "Restangular", "$cookies", "authService", "Token", function($rootScope, $http, $state, Restangular, $cookies, authService, Token) {
+    '$rootScope', "$http", "$state", "loginRestangular", "$cookies", "authService", "Token", function($rootScope, $http, $state, loginRestangular, $cookies, authService, Token) {
       console.debug("init unisson auth service");
-      return new LoginService($rootScope, $http, $state, Restangular, $cookies, authService, Token);
+      return new LoginService($rootScope, $http, $state, loginRestangular, $cookies, authService, Token);
     }
   ]);
 
