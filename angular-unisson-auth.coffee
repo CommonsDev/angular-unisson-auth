@@ -1,14 +1,20 @@
 module = angular.module('angular-unisson-auth', ['http-auth-interceptor', 'ngCookies', 'googleOauth'])
 
-class LoginService   
+class LoginService
         """
         Login a user
         """
-        constructor: (@$rootScope, @$http, @$state, @loginRestangular, @$cookies, @authService, @Token) ->
-                @$rootScope.authVars =                        
+        constructor: (@$rootScope, @baseUrl, @$http, @$state, @Restangular, @$cookies, @authService, @Token) ->
+                @$rootScope.authVars =
                         username : "",
                         isAuthenticated: false,
                         loginrequired : false
+
+                # Custom restangular for this login URL
+                @loginRestangular = Restangular.withConfig((RestangularConfigurer) ->
+                        RestangularConfigurer.setBaseUrl(baseUrl)
+                )
+
 
                 # On login required
                 @$rootScope.$on('event:auth-loginRequired', =>
@@ -52,7 +58,7 @@ class LoginService
 
                 @$state.go(@$rootScope.homeStateName, {}, {reload:true})
 
- 
+
         submit: =>
                 console.debug('submitting login...')
                 @loginRestangular.all('account/user').customPOST(
@@ -92,17 +98,10 @@ class LoginService
                         alert("Failed to get token from popup.")
                 )
 
+module.provider("loginService", ->
+        setBaseUrl: (baseUrl) ->
+                @baseUrl = baseUrl
 
-
-#Login Restangular service that needs rootScope variable configuration
-module.factory('loginRestangular', ['$rootScope','Restangular', ($rootScope, Restangular) ->
-        console.debug(" Setting login base url : "+ $rootScope.loginBaseUrl)
-        return Restangular.withConfig( (RestangularConfigurer) ->
-                RestangularConfigurer.setBaseUrl($rootScope.loginBaseUrl)
-        )
-])
-
-module.factory("loginService", ['$rootScope', "$http", "$state", "loginRestangular", "$cookies", "authService", "Token", ($rootScope, $http, $state, loginRestangular, $cookies, authService, Token) ->
-        console.debug("init unisson auth service")
-        return new LoginService($rootScope, $http, $state, loginRestangular, $cookies, authService, Token)
-])
+        $get: ($rootScope, $http, $state, Restangular, $cookies, authService, Token) ->
+                return new LoginService($rootScope, @baseUrl, $http, $state, Restangular, $cookies, authService, Token)
+)
