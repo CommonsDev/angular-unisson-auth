@@ -57,9 +57,8 @@
     }
 
     LoginService.prototype.forceLogin = function() {
-      console.debug("forcing login");
-      this.$rootScope.authVars.loginrequired = true;
-      return console.debug(this.$rootScope.authVars.loginrequired);
+      console.debug("forcing login on request");
+      return this.$rootScope.authVars.loginrequired = true;
     };
 
     LoginService.prototype.logout = function() {
@@ -68,9 +67,11 @@
       delete this.$cookies['username'];
       delete this.$cookies['key'];
       this.$rootScope.authVars.username = "";
-      return this.$state.go(this.$rootScope.homeStateName, {}, {
-        reload: true
-      });
+      if (this.$rootScope.homeStateName) {
+        return this.$state.go(this.$rootScope.homeStateName, {}, {
+          reload: true
+        });
+      }
     };
 
     LoginService.prototype.submit = function() {

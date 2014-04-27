@@ -46,9 +46,9 @@ class LoginService
                 @$rootScope.logout = this.logout
 
         forceLogin: =>
-                console.debug("forcing login")
+                console.debug("forcing login on request")
                 @$rootScope.authVars.loginrequired = true
-                console.debug(@$rootScope.authVars.loginrequired)
+
         logout: =>
                 @$rootScope.authVars.isAuthenticated = false
                 delete @$http.defaults.headers.common['Authorization']
@@ -56,7 +56,8 @@ class LoginService
                 delete @$cookies['key']
                 @$rootScope.authVars.username = ""
 
-                @$state.go(@$rootScope.homeStateName, {}, {reload:true})
+                if @$rootScope.homeStateName
+                        @$state.go(@$rootScope.homeStateName, {}, {reload:true})
 
 
         submit: =>
