@@ -73,6 +73,7 @@
         console.log(data);
         _this.$cookies.username = data.username;
         _this.$cookies.key = data.key;
+        _this.$rootScope.authVars.profile_id = data.profile_id;
         _this.$http.defaults.headers.common['Authorization'] = "ApiKey " + data.username + ":" + data.key;
         return _this.authService.loginConfirmed();
       }, function(data) {

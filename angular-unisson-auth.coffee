@@ -61,6 +61,7 @@ class LoginService
                                 console.log(data)
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
+                                @$rootScope.authVars.profile_id = data.profile_id
                                 @$http.defaults.headers.common['Authorization'] = "ApiKey #{data.username}:#{data.key}"
                                 @authService.loginConfirmed()
                         , (data) =>
