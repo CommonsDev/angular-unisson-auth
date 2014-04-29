@@ -28,6 +28,7 @@ class LoginService
                         @$rootScope.authVars.loginrequired = false
                         @$rootScope.authVars.username = @$cookies.username
                         @$rootScope.authVars.isAuthenticated = true
+                        @$rootScope.authVars.profile_id = @$cookies.profile_id
                 )
 
                 # set authorization header if already logged in
@@ -68,6 +69,7 @@ class LoginService
                                 console.log(data)
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
+                                @$cookies.profile_id = data.profile_id
                                 @$rootScope.authVars.profile_id = data.profile_id
                                 @$http.defaults.headers.common['Authorization'] = "ApiKey #{data.username}:#{data.key}"
                                 @authService.loginConfirmed()
