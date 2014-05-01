@@ -1,4 +1,13 @@
-module = angular.module('angular-unisson-auth', ['http-auth-interceptor', 'ngCookies', 'googleOauth'])
+module = angular.module('angular-unisson-auth', ['http-auth-interceptor', 'ngCookies', 'googleOauth', 'restangular'])
+
+# Rest factories
+module.factory('Groups', (Restangular) ->
+        return Restangular.service('account/group')
+)
+
+module.factory('Users', (Restangular) ->
+        return Restangular.service('account/user')
+)
 
 class LoginService
         """
@@ -28,7 +37,6 @@ class LoginService
                         @$rootScope.authVars.loginrequired = false
                         @$rootScope.authVars.username = @$cookies.username
                         @$rootScope.authVars.isAuthenticated = true
-                        @$rootScope.authVars.profile_id = @$cookies.profile_id
                 )
 
                 # set authorization header if already logged in
@@ -69,8 +77,7 @@ class LoginService
                                 console.log(data)
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
-                                @$cookies.profile_id = data.profile_id
-                                @$rootScope.authVars.profile_id = data.profile_id
+                                @$rootScope.authVars.user = data
                                 @$http.defaults.headers.common['Authorization'] = "ApiKey #{data.username}:#{data.key}"
                                 @authService.loginConfirmed()
                         , (data) =>
