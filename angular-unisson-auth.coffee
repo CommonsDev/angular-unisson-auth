@@ -37,6 +37,10 @@ class LoginService
                         @$rootScope.authVars.loginrequired = false
                         @$rootScope.authVars.username = @$cookies.username
                         @$rootScope.authVars.isAuthenticated = true
+                        @loginRestangular.all('account/user').get(@$cookies.username).then((data)=>
+                                        console.log("user object", data)
+                                        @$rootScope.authVars.user = data
+                                )
                 )
 
                 # set authorization header if already logged in
@@ -77,9 +81,13 @@ class LoginService
                                 console.log(data)
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
-                                @$rootScope.authVars.user = data
                                 @$http.defaults.headers.common['Authorization'] = "ApiKey #{data.username}:#{data.key}"
-                                @authService.loginConfirmed()
+                                @loginRestangular.all('account/user').get(data.username).then((data)=>
+                                        console.log("user object", data)
+                                        @$rootScope.authVars.user = data
+                                        @authService.loginConfirmed()
+                                )
+                                
                         , (data) =>
                                 console.debug("LoginController submit error: #{data.reason}")
                                 @$rootScope.errorMsg = data.reason

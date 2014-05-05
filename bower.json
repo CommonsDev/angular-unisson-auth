@@ -1,6 +1,6 @@
 {
     "name": "angular-unisson-auth",
-    "version": "0.1.3",
+    "version": "0.1.5",
     "main": "angular-unisson-auth.js",
     "ignore": [
       ".gitignore",
