@@ -3,7 +3,7 @@ How to use ?
 
 It requires following rootScope variables to work:
 
-`$rootScope.homeStateName `: the name of the state (depends on stateProvider service) to redirect after logout
+  $rootScope.homeStateName : the name of the state (depends on stateProvider service) to redirect after logout
 
 In a `app.config()`, call 'loginServiceProvider' and use:
 
