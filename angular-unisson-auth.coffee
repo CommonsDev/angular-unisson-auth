@@ -87,7 +87,7 @@ class LoginService
                                         @$rootScope.authVars.user = data
                                         @authService.loginConfirmed()
                                 )
-                                
+
                         , (data) =>
                                 console.debug("LoginController submit error: #{data.reason}")
                                 @$rootScope.errorMsg = data.reason
@@ -101,9 +101,7 @@ class LoginService
                 @Token.getTokenByPopup(extraParams).then((params) =>
 
                         # Verify the token before setting it, to avoid the confused deputy problem.
-                        @loginRestangular.all('account/user/login').customPOST("google", {}, {},
-                                access_token: params.access_token
-                        ).then((data) =>
+                        @loginRestangular.all('account/user/login').customPOST({access_token: params.access_token}, "google", {}).then((data) =>
                                 @$cookies.username = data.username
                                 @$cookies.key = data.key
                                 @$http.defaults.headers.common['Authorization'] = "ApiKey #{data.username}:#{data.key}"
