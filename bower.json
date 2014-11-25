@@ -9,6 +9,6 @@
     "dependencies": {
       "angular-http-auth":"latest",
       "angular-cookies":"latest",
-      "angular-oauth":"latest"
+      "angular-oauth":"https://github.com/UnissonCo/angular-oauth"
     }
 }
