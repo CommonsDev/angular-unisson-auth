@@ -22,6 +22,7 @@ class LoginService
                 # Custom restangular for this login URL
                 @loginRestangular = Restangular.withConfig((RestangularConfigurer) ->
                         RestangularConfigurer.setBaseUrl(baseUrl)
+                        RestangularConfigurer.setDefaultHttpFields({'ignoreAuthModule':true})
                 )
 
 
